@@ -1,4 +1,4 @@
-name: Test ARC Runner
+name: Test | ARC Runner
 
 on:
   workflow_dispatch:
