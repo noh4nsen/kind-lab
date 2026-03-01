@@ -1,3 +1,7 @@
 githubConfigUrl: "https://github.com/noh4nsen/ai-lab"
 
 githubConfigSecret: arc-github-secret
+
+controllerServiceAccount:
+  namespace: arc-systems
+  name: arc-gha-rs-controller
