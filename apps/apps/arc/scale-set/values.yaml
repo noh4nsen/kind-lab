@@ -4,4 +4,4 @@ githubConfigSecret: arc-github-secret
 
 controllerServiceAccount:
   namespace: arc-systems
-  name: arc-gha-rs-controller
+  name: arc-controller-gha-rs-controller
