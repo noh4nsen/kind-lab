@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: arc-controller
+  name: arc-scale-set
   namespace: argocd
 spec:
   project: default
