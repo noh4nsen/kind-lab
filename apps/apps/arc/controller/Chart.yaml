@@ -1,5 +1,4 @@
 apiVersion: v2
-name: arc-controller
 type: application
 version: 0.1.0
 appVersion: "0.13.1"
