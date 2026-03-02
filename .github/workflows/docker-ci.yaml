@@ -85,7 +85,6 @@ jobs:
         with:
           dockerfile: ${{ steps.validate.outputs.dockerfile }}
           failure-threshold: warning
-          ignore: DL3008,DL3009
 
   build-and-scan:
     needs: [detect-changes, hadolint]
@@ -140,7 +139,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
