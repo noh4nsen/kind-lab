@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: noh4nsen/test-api
-  tag: "20260302.8"
+  tag: "20260302.9"
   pullPolicy: IfNotPresent
 service:
   type: ClusterIP
