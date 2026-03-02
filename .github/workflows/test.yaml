@@ -16,6 +16,7 @@ jobs:
           echo "Runner OS: $RUNNER_OS"
           echo "Runner arch: $RUNNER_ARCH"
           uname -a
+          echo "Current directory: $(pwd)"
 
       - name: Test basic commands
         run: |
