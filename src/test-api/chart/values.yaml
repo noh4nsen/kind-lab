@@ -1,0 +1,22 @@
+replicaCount: 1
+
+image:
+  repository: noh4nsen/test-api
+  tag: "20260302.4"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+env:
+  - name: ENVIRONMENT
+    value: "lab"

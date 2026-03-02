@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test-api
+  namespace: argocd
+spec:
+  project: default
+  source: 
+    repoURL: https://github.com/noh4nsen/ai-lab.git
+    targetRevision: HEAD
+    path: src/test-api/chart
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: test-api
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
