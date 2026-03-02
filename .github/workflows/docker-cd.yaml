@@ -18,3 +18,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Generate Image Tag
+        id: image-tag
+        run: |
+          export IMAGE_TAG=$(date +%Y%m%d).${{ github.run_number }}
+          echo $IMAGE_TAG
