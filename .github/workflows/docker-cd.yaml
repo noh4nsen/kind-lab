@@ -70,21 +70,21 @@ jobs:
           PROJECT_PATH="src/${{ matrix.project }}"
           
           if [ ! -d "$PROJECT_PATH" ]; then
-            echo "❌ Project directory not found: $PROJECT_PATH"
+            echo "Project directory not found: $PROJECT_PATH"
             exit 1
           fi
           
           if [ ! -f "$PROJECT_PATH/Dockerfile" ]; then
-            echo "❌ Dockerfile not found in $PROJECT_PATH"
+            echo "Dockerfile not found in $PROJECT_PATH"
             exit 1
           fi
           
           if [ ! -f "$PROJECT_PATH/chart/values.yaml" ]; then
-            echo "❌ Helm chart values.yaml not found in $PROJECT_PATH/chart/"
+            echo "Helm chart values.yaml not found in $PROJECT_PATH/chart/"
             exit 1
           fi
           
-          echo "✅ Project structure validated"
+          echo "Project structure validated"
           echo "context=$PROJECT_PATH" >> "$GITHUB_OUTPUT"
           echo "dockerfile=$PROJECT_PATH/Dockerfile" >> "$GITHUB_OUTPUT"
           echo "chart_values=$PROJECT_PATH/chart/values.yaml" >> "$GITHUB_OUTPUT"
@@ -149,4 +149,24 @@ jobs:
 
           git add "${CHART_VALUES_FILE}"
           git commit -m "chore(${{ matrix.project }}): bump image to ${{ steps.image-refs.outputs.image_tag }} [skip ci]"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
+          
+          # Retry logic for concurrent pushes
+          MAX_RETRIES=5
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            git pull --rebase origin ${{ github.ref_name }} && \
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }} && \
+            break || {
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "Push failed, retrying in 5 seconds... (attempt $RETRY_COUNT/$MAX_RETRIES)"
+                sleep 5
+              else
+                echo "Failed to push after $MAX_RETRIES attempts"
+                exit 1
+              fi
+            }
+          done
+          
+          echo "Successfully pushed chart update"
