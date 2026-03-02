@@ -1,15 +1,25 @@
 name: Docker | Build and Push
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/test-api/**"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 env:
   APP_NAME: test-api
   CONTEXT: ./src/test-api
   DOCKERFILE: ./src/test-api/Dockerfile
+  CHART_VALUES_FILE: ./src/test-api/chart/values.yaml
 
 jobs:
   build-and-push:
+    if: github.actor != 'github-actions[bot]'
     runs-on: arc-scale-set
     steps:
       - name: Checkout code
@@ -42,8 +52,43 @@ jobs:
             ${{ steps.image-refs.outputs.image_repo }}:${{ steps.image-refs.outputs.image_tag }}
             ${{ steps.image-refs.outputs.image_repo }}:latest
 
-      - name: Summary
+      - name: Install yq
         run: |
-          echo "Pushed:"
-          echo "${{ steps.image-refs.outputs.image_repo }}:${{ steps.image-refs.outputs.image_tag }}"
-          echo "${{ steps.image-refs.outputs.image_repo }}:latest"
+          if ! command -v yq >/dev/null 2>&1; then
+            sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            sudo chmod +x /usr/local/bin/yq
+          fi
+          yq --version
+
+      - name: Install gh (if missing)
+        run: |
+          if ! command -v gh >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y gh
+          fi
+          gh --version
+
+      - name: Update Helm values with new image
+        env:
+          IMAGE_REPO: ${{ steps.image-refs.outputs.image_repo }}
+          IMAGE_TAG: ${{ steps.image-refs.outputs.image_tag }}
+        run: |
+          yq -i '.image.repository = strenv(IMAGE_REPO)' "${CHART_VALUES_FILE}"
+          yq -i '.image.tag = strenv(IMAGE_TAG)' "${CHART_VALUES_FILE}"
+          echo "Updated ${CHART_VALUES_FILE}:"
+          cat "${CHART_VALUES_FILE}"
+
+      - name: Commit and push chart update
+        run: |
+          if git diff --quiet -- "${CHART_VALUES_FILE}"; then
+            echo "No chart changes to commit."
+            exit 0
+          fi
+
+          gh auth setup-git
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add "${CHART_VALUES_FILE}"
+          git commit -m "chore(test-api): bump image to ${{ steps.image-refs.outputs.image_tag }} [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}
