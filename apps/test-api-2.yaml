@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source: 
-    repoURL: https://github.com/noh4nsen/ai-lab.git
+    repoURL: https://github.com/noh4nsen/kind-lab.git
     targetRevision: HEAD
     path: src/test-api-2/chart
   destination:

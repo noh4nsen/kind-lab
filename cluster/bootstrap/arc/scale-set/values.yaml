@@ -1,5 +1,5 @@
 gha-runner-scale-set:
-  githubConfigUrl: "https://github.com/noh4nsen/ai-lab"
+  githubConfigUrl: "https://github.com/noh4nsen/kind-lab"
   githubConfigSecret: arc-github-secret
   controllerServiceAccount:
     namespace: arc-systems
